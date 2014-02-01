@@ -38,6 +38,8 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 	private static PassengerComparator passengerComparator;
 	
 	private static CoffeeStoreComparator coffeeStoreComparator;
+	
+	private static CompanyComparator companyComparator;
 
 	/**
 	 * The name of the player.
@@ -84,6 +86,7 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 	private java.util.ArrayList<Company> privateCompanies;
 
 	public final java.util.ArrayList<Company> getCompanies() {
+		Collections.sort(privateCompanies,companyComparator);
 		return privateCompanies;
 	}
 
@@ -315,15 +318,15 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 				ptDest = pickup.get(0).getLobby().getBusStop();
 				break;
 			case PASSENGER_REFUSED_ENEMY:
-				// add in random so no refuse loop
 				java.util.List<Company> comps = getCompanies();
+				int i=0;
 				while (ptDest == null) {
-					int randCompany = rand.nextInt(comps.size());
-					if (comps.get(randCompany) != getMe().getLimo()
+					if (comps.get(i) != getMe().getLimo()
 							.getPassenger().getDestination()) {
-						ptDest = comps.get(randCompany).getBusStop();
+						ptDest = getCompanies().get(i).getBusStop();
 						break;
 					}
+					i++;
 				}
 				break;
 			case PASSENGER_DELIVERED_AND_PICKED_UP:
@@ -616,6 +619,21 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 		}
 		
 		public CoffeeStoreComparator(MyPlayerBrain brain) {
+			this.brain = brain;
+		}
+	}
+	
+	private static class CompanyComparator implements Comparator<Company> {
+		MyPlayerBrain brain;
+		
+		public int compare(Company a, Company b) {
+			int aDist=0, bDist=0;
+			aDist=brain.CalculatePathPlus1(brain.privateMe,a.getBusStop()).size();
+			bDist=brain.CalculatePathPlus1(brain.privateMe,b.getBusStop()).size();
+			return (aDist<=bDist?-1:1);
+		}
+		
+		public CompanyComparator(MyPlayerBrain brain) {
 			this.brain = brain;
 		}
 	}
