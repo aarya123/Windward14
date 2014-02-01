@@ -238,6 +238,7 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 		try {
 			passengerComparator = new PassengerComparator(this);
 			coffeeStoreComparator= new CoffeeStoreComparator(this);
+			companyComparator= new CompanyComparator(this);
 			setGameMap(map);
 			setPlayers(players);
 			setMe(me);
@@ -429,8 +430,9 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 		if (pu2 == null)
 			return;
 		// 10% discard, 90% play
-		if (false)//rand.nextInt(10) == 0)
+		if (rand.nextInt(10) == 0){
 			playCards.invoke(PlayerAIBase.CARD_ACTION.DISCARD, pu2);
+		}
 		else {
 			if (pu2.getCard() == PowerUp.CARD.MOVE_PASSENGER) {
 				Passenger toUseCardOn = null;
@@ -585,6 +587,7 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 		return path;
 	}
 
+	//returns a list of possible passengers to pickup
 	private static java.util.ArrayList<Passenger> AllPickups(Player me,
 			Iterable<Passenger> passengers) {
 		java.util.ArrayList<Passenger> pickup = new java.util.ArrayList<Passenger>();
@@ -600,14 +603,22 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 		return pickup;
 	}
 	
+	private int getScore(Passenger pass)
+	{
+		//Calculates total distance to completion over 
+		int distToDest = SimpleAStar.CalculatePath(getGameMap(), pass.getLobby().getBusStop(), pass.getDestination().getBusStop()).size();
+		int distToPass=CalculatePathPlus1(privateMe,pass.getLobby().getBusStop()).size();
+		int score = (distToDest + distToPass)/pass.getPointsDelivered();
+		return score;
+	}
+	
 	private static class PassengerComparator implements Comparator<Passenger> {
 		MyPlayerBrain brain;
-		
+		//compares passengers based on their total travel distance and point value
 		public int compare(Passenger a, Passenger b) {
-			int aDist=0, bDist=0;
-			aDist=brain.CalculatePathPlus1(brain.privateMe,a.getLobby().getBusStop()).size();
-			bDist=brain.CalculatePathPlus1(brain.privateMe,b.getLobby().getBusStop()).size();
-			return (aDist<=bDist?-1:1);
+			int aScore = brain.getScore(a);
+			int bScore = brain.getScore(b);
+			return aScore - bScore;
 		}
 		
 		public PassengerComparator(MyPlayerBrain brain) {
@@ -633,6 +644,7 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 	private static class CompanyComparator implements Comparator<Company> {
 		MyPlayerBrain brain;
 		
+		//sorts based on the distance between us and the companies' bus stops
 		public int compare(Company a, Company b) {
 			int aDist=0, bDist=0;
 			aDist=brain.CalculatePathPlus1(brain.privateMe,a.getBusStop()).size();
