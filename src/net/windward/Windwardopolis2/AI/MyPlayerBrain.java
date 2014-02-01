@@ -35,7 +35,9 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 
 	private static Logger log = Logger.getLogger(IPlayerAI.class);
 	
-	private static MyPlayerBrain.PassengerComparator passengerComparator ;
+	private static PassengerComparator passengerComparator;
+	
+	private static CoffeeStoreComparator coffeeStoreComparator;
 
 	/**
 	 * The name of the player.
@@ -108,6 +110,7 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 	private java.util.ArrayList<CoffeeStore> privateStores;
 
 	public final ArrayList<CoffeeStore> getCoffeeStores() {
+		Collections.sort(privateStores,coffeeStoreComparator);
 		return privateStores;
 	}
 
@@ -230,7 +233,8 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 			PlayerAIBase.PlayerCardEvent cardEvent) {
 
 		try {
-			passengerComparator = new MyPlayerBrain.PassengerComparator(this);
+			passengerComparator = new PassengerComparator(this);
+			coffeeStoreComparator= new CoffeeStoreComparator(this);
 			setGameMap(map);
 			setPlayers(players);
 			setMe(me);
@@ -337,16 +341,12 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 			case PASSENGER_DELIVERED:
 			case PASSENGER_ABANDONED:
 				if (getMe().getLimo().getCoffeeServings() <= 0) {
-					java.util.List<CoffeeStore> cof = getCoffeeStores();
-					int randCof = rand.nextInt(cof.size());
-					ptDest = cof.get(randCof).getBusStop();
+					ptDest = getCoffeeStores().get(0).getBusStop();
 				}
 				break;
 			case PASSENGER_REFUSED_NO_COFFEE:
 			case PASSENGER_DELIVERED_AND_PICK_UP_REFUSED:
-				java.util.List<CoffeeStore> cof = getCoffeeStores();
-				int randCof = rand.nextInt(cof.size());
-				ptDest = cof.get(randCof).getBusStop();
+				ptDest = getCoffeeStores().get(0).getBusStop();
 				break;
 			case COFFEE_STORE_CAR_RESTOCKED:
 				pickup = AllPickups(getMe(), getPassengers());
@@ -586,9 +586,7 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 					&& (psngr.getDestination() != null))
 				pickup.add(psngr);
 		}
-		double startSort=System.currentTimeMillis();
 		Collections.sort(pickup, passengerComparator);
-		System.err.println("Sort time: "+(System.currentTimeMillis()-startSort)+"ms");
 		return pickup;
 	}
 	
@@ -603,6 +601,21 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 		}
 		
 		public PassengerComparator(MyPlayerBrain brain) {
+			this.brain = brain;
+		}
+	}
+	
+	private static class CoffeeStoreComparator implements Comparator<CoffeeStore> {
+		MyPlayerBrain brain;
+		
+		public int compare(CoffeeStore a, CoffeeStore b) {
+			int aDist=0, bDist=0;
+			aDist=brain.CalculatePathPlus1(brain.privateMe,a.getBusStop()).size();
+			bDist=brain.CalculatePathPlus1(brain.privateMe,b.getBusStop()).size();
+			return (aDist<=bDist?-1:1);
+		}
+		
+		public CoffeeStoreComparator(MyPlayerBrain brain) {
 			this.brain = brain;
 		}
 	}
