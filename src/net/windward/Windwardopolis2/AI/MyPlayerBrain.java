@@ -430,10 +430,13 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 		if (pu2 == null)
 			return;
 		// 10% discard, 90% play
-		if (rand.nextInt(10) == 0){
-			playCards.invoke(PlayerAIBase.CARD_ACTION.DISCARD, pu2);
+		//if it's a card that requires coffee, discard it
+		if (pu2.getCard() == PowerUp.CARD.MULT_DELIVERING_PASSENGER
+				|| pu2.getCard() == PowerUp.CARD.MULT_DELIVER_AT_COMPANY
+				|| pu2.getCard() == PowerUp.CARD.RELOCATE_ALL_CARS){//rand.nextInt(10) == 0){
+			playCards.invoke(PlayerAIBase.CARD_ACTION.PLAY, pu2);
 		}
-		else {
+		else if(!(rand.nextInt(10) == 0)) {
 			if (pu2.getCard() == PowerUp.CARD.MOVE_PASSENGER) {
 				Passenger toUseCardOn = null;
 				for (Passenger pass : privatePassengers) {
