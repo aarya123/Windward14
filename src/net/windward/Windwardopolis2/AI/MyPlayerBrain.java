@@ -586,9 +586,8 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 					&& (psngr.getDestination() != null))
 				pickup.add(psngr);
 		}
-		double startSort=System.currentTimeMillis();
+		
 		Collections.sort(pickup, passengerComparator);
-		System.err.println("Sort time: "+(System.currentTimeMillis()-startSort)+"ms");
 		return pickup;
 	}
 	
