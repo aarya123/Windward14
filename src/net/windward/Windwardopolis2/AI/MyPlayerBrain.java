@@ -254,7 +254,7 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 
 		}
 	}
-double last=0;
+
 	/**
 	 * Called to send an update message to this A.I. We do NOT have to send
 	 * orders in response.
@@ -265,16 +265,12 @@ double last=0;
 	 *            The player this status is about. THIS MAY NOT BE YOU.
 	 */
 	public final void GameStatus(PlayerAIBase.STATUS status, Player plyrStatus) {
-
 		// bugbug - Framework.cs updates the object's in this object's Players,
 		// Passengers, and Companies lists. This works fine as long
 		// as this app is single threaded. However, if you create worker
 		// thread(s) or respond to multiple status messages simultaneously
 		// then you need to split these out and synchronize access to the saved
 		// list objects.
-		double temp=System.currentTimeMillis();
-		System.out.println("Time Since Last Call: " +(temp-last) +"ms");
-		last=temp;
 		try {
 			// bugbug - we return if not us because the below code is only for
 			// when we need a new path or our limo hit a bus stop.
@@ -398,7 +394,6 @@ double last=0;
 		} catch (RuntimeException ex) {
 			ex.printStackTrace();
 		}
-		System.out.println("Calculation time: "+(System.currentTimeMillis()-last)+"ms");
 	}
 
 	private void MaybePlayPowerUp() {
