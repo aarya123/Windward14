@@ -92,6 +92,10 @@ public class PowerUp {
 
     // The name of the power-up.
     private String name;
+    
+    public String toString() {
+    	return name;
+    }
 
     public String getName() {
         return name;
