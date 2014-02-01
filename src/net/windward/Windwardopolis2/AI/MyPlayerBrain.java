@@ -35,7 +35,11 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 
 	private static Logger log = Logger.getLogger(IPlayerAI.class);
 	
-	private static MyPlayerBrain.PassengerComparator passengerComparator ;
+	private static PassengerComparator passengerComparator;
+	
+	private static CoffeeStoreComparator coffeeStoreComparator;
+	
+	private static CompanyComparator companyComparator;
 
 	/**
 	 * The name of the player.
@@ -82,6 +86,7 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 	private java.util.ArrayList<Company> privateCompanies;
 
 	public final java.util.ArrayList<Company> getCompanies() {
+		Collections.sort(privateCompanies,companyComparator);
 		return privateCompanies;
 	}
 
@@ -108,6 +113,7 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 	private java.util.ArrayList<CoffeeStore> privateStores;
 
 	public final ArrayList<CoffeeStore> getCoffeeStores() {
+		Collections.sort(privateStores,coffeeStoreComparator);
 		return privateStores;
 	}
 
@@ -230,7 +236,8 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 			PlayerAIBase.PlayerCardEvent cardEvent) {
 
 		try {
-			passengerComparator = new MyPlayerBrain.PassengerComparator(this);
+			passengerComparator = new PassengerComparator(this);
+			coffeeStoreComparator= new CoffeeStoreComparator(this);
 			setGameMap(map);
 			setPlayers(players);
 			setMe(me);
@@ -311,15 +318,15 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 				ptDest = pickup.get(0).getLobby().getBusStop();
 				break;
 			case PASSENGER_REFUSED_ENEMY:
-				// add in random so no refuse loop
 				java.util.List<Company> comps = getCompanies();
+				int i=0;
 				while (ptDest == null) {
-					int randCompany = rand.nextInt(comps.size());
-					if (comps.get(randCompany) != getMe().getLimo()
+					if (comps.get(i) != getMe().getLimo()
 							.getPassenger().getDestination()) {
-						ptDest = comps.get(randCompany).getBusStop();
+						ptDest = getCompanies().get(i).getBusStop();
 						break;
 					}
+					i++;
 				}
 				break;
 			case PASSENGER_DELIVERED_AND_PICKED_UP:
@@ -337,16 +344,12 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 			case PASSENGER_DELIVERED:
 			case PASSENGER_ABANDONED:
 				if (getMe().getLimo().getCoffeeServings() <= 0) {
-					java.util.List<CoffeeStore> cof = getCoffeeStores();
-					int randCof = rand.nextInt(cof.size());
-					ptDest = cof.get(randCof).getBusStop();
+					ptDest = getCoffeeStores().get(0).getBusStop();
 				}
 				break;
 			case PASSENGER_REFUSED_NO_COFFEE:
 			case PASSENGER_DELIVERED_AND_PICK_UP_REFUSED:
-				java.util.List<CoffeeStore> cof = getCoffeeStores();
-				int randCof = rand.nextInt(cof.size());
-				ptDest = cof.get(randCof).getBusStop();
+				ptDest = getCoffeeStores().get(0).getBusStop();
 				break;
 			case COFFEE_STORE_CAR_RESTOCKED:
 				pickup = AllPickups(getMe(), getPassengers());
@@ -593,7 +596,6 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 					&& (psngr.getDestination() != null))
 				pickup.add(psngr);
 		}
-		
 		Collections.sort(pickup, passengerComparator);
 		return pickup;
 	}
@@ -609,6 +611,36 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 		}
 		
 		public PassengerComparator(MyPlayerBrain brain) {
+			this.brain = brain;
+		}
+	}
+	
+	private static class CoffeeStoreComparator implements Comparator<CoffeeStore> {
+		MyPlayerBrain brain;
+		
+		public int compare(CoffeeStore a, CoffeeStore b) {
+			int aDist=0, bDist=0;
+			aDist=brain.CalculatePathPlus1(brain.privateMe,a.getBusStop()).size();
+			bDist=brain.CalculatePathPlus1(brain.privateMe,b.getBusStop()).size();
+			return (aDist<=bDist?-1:1);
+		}
+		
+		public CoffeeStoreComparator(MyPlayerBrain brain) {
+			this.brain = brain;
+		}
+	}
+	
+	private static class CompanyComparator implements Comparator<Company> {
+		MyPlayerBrain brain;
+		
+		public int compare(Company a, Company b) {
+			int aDist=0, bDist=0;
+			aDist=brain.CalculatePathPlus1(brain.privateMe,a.getBusStop()).size();
+			bDist=brain.CalculatePathPlus1(brain.privateMe,b.getBusStop()).size();
+			return (aDist<=bDist?-1:1);
+		}
+		
+		public CompanyComparator(MyPlayerBrain brain) {
 			this.brain = brain;
 		}
 	}
