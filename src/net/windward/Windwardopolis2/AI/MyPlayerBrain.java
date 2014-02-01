@@ -10,6 +10,7 @@
 package net.windward.Windwardopolis2.AI;
 
 import net.windward.Windwardopolis2.api.*;
+
 import org.apache.log4j.Logger;
 
 import java.awt.*;
@@ -19,6 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * The sample C# AI. Start with this project but write your own code as this is
@@ -31,6 +34,8 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 	public static String SCHOOL = "Purdue U.";
 
 	private static Logger log = Logger.getLogger(IPlayerAI.class);
+	
+	private static MyPlayerBrain.PassengerComparator passengerComparator ;
 
 	/**
 	 * The name of the player.
@@ -225,6 +230,7 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 			PlayerAIBase.PlayerCardEvent cardEvent) {
 
 		try {
+			passengerComparator = new MyPlayerBrain.PassengerComparator(this);
 			setGameMap(map);
 			setPlayers(players);
 			setMe(me);
@@ -248,7 +254,7 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 
 		}
 	}
-
+double last=0;
 	/**
 	 * Called to send an update message to this A.I. We do NOT have to send
 	 * orders in response.
@@ -266,7 +272,9 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 		// thread(s) or respond to multiple status messages simultaneously
 		// then you need to split these out and synchronize access to the saved
 		// list objects.
-
+		double temp=System.currentTimeMillis();
+		System.out.println("Time Since Last Call: " +(temp-last) +"ms");
+		last=temp;
 		try {
 			// bugbug - we return if not us because the below code is only for
 			// when we need a new path or our limo hit a bus stop.
@@ -390,6 +398,7 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 		} catch (RuntimeException ex) {
 			ex.printStackTrace();
 		}
+		System.out.println("Calculation time: "+(System.currentTimeMillis()-last)+"ms");
 	}
 
 	private void MaybePlayPowerUp() {
@@ -582,8 +591,24 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 					&& (psngr.getDestination() != null))
 				pickup.add(psngr);
 		}
-
-		// add sort by random so no loops for can't pickup
+		double startSort=System.currentTimeMillis();
+		Collections.sort(pickup, passengerComparator);
+		System.err.println("Sort time: "+(System.currentTimeMillis()-startSort)+"ms");
 		return pickup;
+	}
+	
+	private static class PassengerComparator implements Comparator<Passenger> {
+		MyPlayerBrain brain;
+		
+		public int compare(Passenger a, Passenger b) {
+			int aDist=0, bDist=0;
+			aDist=brain.CalculatePathPlus1(brain.privateMe,a.getLobby().getBusStop()).size();
+			bDist=brain.CalculatePathPlus1(brain.privateMe,b.getLobby().getBusStop()).size();
+			return (aDist<=bDist?-1:1);
+		}
+		
+		public PassengerComparator(MyPlayerBrain brain) {
+			this.brain = brain;
+		}
 	}
 }

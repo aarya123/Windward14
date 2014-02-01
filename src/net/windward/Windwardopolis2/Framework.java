@@ -27,7 +27,9 @@ import org.apache.log4j.*;
 public class Framework implements IPlayerCallback {
 	private TcpClient tcpClient;
 	private MyPlayerBrain brain;
-	private String ipAddress = "k9-00.cs.purdue.edu";
+	private String ipAddress = 
+			//"k9-00.cs.purdue.edu";
+			"k9-10.cs.purdue.edu";
 
 	private String myGuid;
 
