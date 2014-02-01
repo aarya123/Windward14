@@ -22,6 +22,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 
 /**
  * The sample C# AI. Start with this project but write your own code as this is
@@ -403,6 +404,11 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 	// }
 
 	public final void GameStatus(PlayerAIBase.STATUS status, Player plyrStatus) {
+		for (Iterator i = AllPickups(getMe(), getPassengers()).iterator(); i.hasNext();) {
+			Passenger p = (Passenger) i.next();
+			//System.err.println(p + " " + getScore(p));
+		}
+		
 		Point ptDest = null;
 		ArrayList<Passenger> pickup = new ArrayList<Passenger>();
 		if (getMe().getLimo().getCoffeeServings() <= 0) {
@@ -425,7 +431,7 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 			pickup.add(toPickup);
 		}
 
-		DisplayOrders(ptDest);
+//		DisplayOrders(ptDest);
 
 		// get the path from where we are to the dest.
 		ArrayList<Point> path = CalculatePathPlus1(getMe(), ptDest);
@@ -661,9 +667,9 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 		if(Collections.disjoint(pass.getDestination().getPassengers(), pass.getEnemies())) {
 			enemyMultiplier = 1.0;
 		} else {
-			double m=100;
+			double m=1000;
 			enemyMultiplier = -(m / (distToDest+m))+1;
-			System.err.println(enemyMultiplier);
+			enemyMultiplier = 0.0;
 		}
 		
 		score *= enemyMultiplier;
