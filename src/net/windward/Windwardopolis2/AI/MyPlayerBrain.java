@@ -252,6 +252,7 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 			java.util.ArrayList<Passenger> pickup = AllPickups(me, passengers);
 
 			// get the path from where we are to the dest.
+			//Check for close coffee shops on path to passenger if we have no passengers
 			java.util.ArrayList<Point> path = CalculatePathPlus1(me, pickup
 					.get(0).getLobby().getBusStop());
 			sendOrders.invoke("ready", path, pickup);
@@ -421,6 +422,10 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 		// can we play one?
 		PowerUp pu2 = null;
 		for (PowerUp current : getPowerUpHand()) {
+			//update isOkToPlay
+			if(getMe().getScore() < .5)
+				current.setOkToPlay(true);
+			
 			if (current.isOkToPlay()) {
 				pu2 = current;
 				break;
@@ -542,6 +547,12 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 			System.out.println(msg);
 			if (log.isInfoEnabled())
 				log.info(msg);
+		}
+
+		//update OkToPlay
+		if(plyrStatus == getMe()){
+			for(PowerUp current:getPowerUpHand())
+				current.setOkToPlay(true);
 		}
 	}
 
