@@ -34,11 +34,11 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 	public static String SCHOOL = "Purdue U.";
 
 	private static Logger log = Logger.getLogger(IPlayerAI.class);
-	
+
 	private static PassengerComparator passengerComparator;
-	
+
 	private static CoffeeStoreComparator coffeeStoreComparator;
-	
+
 	private static CompanyComparator companyComparator;
 
 	/**
@@ -86,7 +86,7 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 	private java.util.ArrayList<Company> privateCompanies;
 
 	public final java.util.ArrayList<Company> getCompanies() {
-		Collections.sort(privateCompanies,companyComparator);
+		Collections.sort(privateCompanies, companyComparator);
 		return privateCompanies;
 	}
 
@@ -113,7 +113,7 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 	private java.util.ArrayList<CoffeeStore> privateStores;
 
 	public final ArrayList<CoffeeStore> getCoffeeStores() {
-		Collections.sort(privateStores,coffeeStoreComparator);
+		Collections.sort(privateStores, coffeeStoreComparator);
 		return privateStores;
 	}
 
@@ -237,8 +237,8 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 
 		try {
 			passengerComparator = new PassengerComparator(this);
-			coffeeStoreComparator= new CoffeeStoreComparator(this);
-			companyComparator= new CompanyComparator(this);
+			coffeeStoreComparator = new CoffeeStoreComparator(this);
+			companyComparator = new CompanyComparator(this);
 			setGameMap(map);
 			setPlayers(players);
 			setMe(me);
@@ -273,132 +273,179 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 	 * @param plyrStatus
 	 *            The player this status is about. THIS MAY NOT BE YOU.
 	 */
+	// public final void GameStatus(PlayerAIBase.STATUS status, Player
+	// plyrStatus) {
+	// // bugbug - Framework.cs updates the object's in this object's Players,
+	// // Passengers, and Companies lists. This works fine as long
+	// // as this app is single threaded. However, if you create worker
+	// // thread(s) or respond to multiple status messages simultaneously
+	// // then you need to split these out and synchronize access to the saved
+	// // list objects.
+	// try {
+	// // bugbug - we return if not us because the below code is only for
+	// // when we need a new path or our limo hit a bus stop.
+	// // if you want to act on other players arriving at bus stops, you
+	// // need to remove this. But make sure you use Me, not
+	// // plyrStatus for the Player you are updatiing (particularly to
+	// // determine what tile to start your path from).
+	// if (plyrStatus != getMe()) {
+	// return;
+	// }
+	//
+	// if (status == PlayerAIBase.STATUS.UPDATE) {
+	// MaybePlayPowerUp();
+	// return;
+	// }
+	//
+	// DisplayStatus(status, plyrStatus);
+	//
+	// if (log.isDebugEnabled())
+	// log.info("gameStatus( " + status + " )");
+	//
+	// Point ptDest = null;
+	// java.util.ArrayList<Passenger> pickup = new
+	// java.util.ArrayList<Passenger>();
+	// switch (status) {
+	// case NO_PATH:
+	// case PASSENGER_NO_ACTION:
+	// if (getMe().getLimo().getPassenger() == null) {
+	// pickup = AllPickups(plyrStatus, getPassengers());
+	// ptDest = pickup.get(0).getLobby().getBusStop();
+	// } else {
+	// ptDest = getMe().getLimo().getPassenger().getDestination()
+	// .getBusStop();
+	// }
+	// break;
+	// case PASSENGER_DELIVERED:
+	// case PASSENGER_ABANDONED:
+	// pickup = AllPickups(getMe(), getPassengers());
+	// ptDest = pickup.get(0).getLobby().getBusStop();
+	// break;
+	// case PASSENGER_REFUSED_ENEMY:
+	// java.util.List<Company> comps = getCompanies();
+	// int i=0;
+	// while (ptDest == null) {
+	// if (comps.get(i) != getMe().getLimo()
+	// .getPassenger().getDestination()) {
+	// ptDest = getCompanies().get(i).getBusStop();
+	// break;
+	// }
+	// i++;
+	// }
+	// break;
+	// case PASSENGER_DELIVERED_AND_PICKED_UP:
+	// case PASSENGER_PICKED_UP:
+	// pickup = AllPickups(getMe(), getPassengers());
+	// ptDest = getMe().getLimo().getPassenger().getDestination()
+	// .getBusStop();
+	// break;
+	//
+	// }
+	//
+	// // coffee store override
+	// switch (status) {
+	// case PASSENGER_DELIVERED_AND_PICKED_UP:
+	// case PASSENGER_DELIVERED:
+	// case PASSENGER_ABANDONED:
+	// if (getMe().getLimo().getCoffeeServings() <= 0) {
+	// ptDest = getCoffeeStores().get(0).getBusStop();
+	// }
+	// break;
+	// case PASSENGER_REFUSED_NO_COFFEE:
+	// case PASSENGER_DELIVERED_AND_PICK_UP_REFUSED:
+	// ptDest = getCoffeeStores().get(0).getBusStop();
+	// break;
+	// case COFFEE_STORE_CAR_RESTOCKED:
+	// pickup = AllPickups(getMe(), getPassengers());
+	// if (pickup.size() == 0)
+	// break;
+	// ptDest = pickup.get(0).getLobby().getBusStop();
+	// break;
+	// }
+	//
+	// // may be another status
+	// if (ptDest == null)
+	// return;
+	//
+	// DisplayOrders(ptDest);
+	//
+	// // get the path from where we are to the dest.
+	// java.util.ArrayList<Point> path = CalculatePathPlus1(getMe(),
+	// ptDest);
+	//
+	// if (log.isDebugEnabled()) {
+	// log.debug(status
+	// + "; Path:"
+	// + (path.size() > 0 ? path.get(0).toString() : "{n/a}")
+	// + "-"
+	// + (path.size() > 0 ? path.get(path.size() - 1)
+	// .toString() : "{n/a}")
+	// + ", "
+	// + path.size()
+	// + " steps; Pickup:"
+	// + (pickup.size() == 0 ? "{none}" : pickup.get(0)
+	// .getName()) + ", " + pickup.size() + " total");
+	// }
+	//
+	// // update our saved Player to match new settings
+	// if (path.size() > 0) {
+	// getMe().getLimo().getPath().clear();
+	// getMe().getLimo().getPath().addAll(path);
+	// }
+	// if (pickup.size() > 0) {
+	// getMe().getPickUp().clear();
+	// getMe().getPickUp().addAll(pickup);
+	// }
+	//
+	// sendOrders.invoke("move", path, pickup);
+	// } catch (RuntimeException ex) {
+	// ex.printStackTrace();
+	// }
+	// }
+
 	public final void GameStatus(PlayerAIBase.STATUS status, Player plyrStatus) {
-		// bugbug - Framework.cs updates the object's in this object's Players,
-		// Passengers, and Companies lists. This works fine as long
-		// as this app is single threaded. However, if you create worker
-		// thread(s) or respond to multiple status messages simultaneously
-		// then you need to split these out and synchronize access to the saved
-		// list objects.
-		try {
-			// bugbug - we return if not us because the below code is only for
-			// when we need a new path or our limo hit a bus stop.
-			// if you want to act on other players arriving at bus stops, you
-			// need to remove this. But make sure you use Me, not
-			// plyrStatus for the Player you are updatiing (particularly to
-			// determine what tile to start your path from).
-			if (plyrStatus != getMe()) {
-				return;
-			}
-
-			if (status == PlayerAIBase.STATUS.UPDATE) {
-				MaybePlayPowerUp();
-				return;
-			}
-
-			DisplayStatus(status, plyrStatus);
-
-			if (log.isDebugEnabled())
-				log.info("gameStatus( " + status + " )");
-
-			Point ptDest = null;
-			java.util.ArrayList<Passenger> pickup = new java.util.ArrayList<Passenger>();
-			switch (status) {
-			case NO_PATH:
-			case PASSENGER_NO_ACTION:
-				if (getMe().getLimo().getPassenger() == null) {
-					pickup = AllPickups(plyrStatus, getPassengers());
-					ptDest = pickup.get(0).getLobby().getBusStop();
-				} else {
-					ptDest = getMe().getLimo().getPassenger().getDestination()
-							.getBusStop();
+		Point ptDest = null;
+		ArrayList<Passenger> pickup = new ArrayList<Passenger>();
+		if (getMe().getLimo().getCoffeeServings() <= 0) {
+			ptDest = getCoffeeStores().get(0).getBusStop();
+		} else {
+			ArrayList<Passenger> poss = AllPickups(getMe(), getPassengers());
+			if (getMe().getLimo().getPassenger() != null)
+				poss.add(getMe().getLimo().getPassenger());
+			double max = Double.NEGATIVE_INFINITY;
+			Passenger toPickup = null;
+			for (Passenger p : poss) {
+				if (getScore(p) > max) {
+					max = getScore(p);
+					toPickup = p;
 				}
-				break;
-			case PASSENGER_DELIVERED:
-			case PASSENGER_ABANDONED:
-				pickup = AllPickups(getMe(), getPassengers());
-				ptDest = pickup.get(0).getLobby().getBusStop();
-				break;
-			case PASSENGER_REFUSED_ENEMY:
-				java.util.List<Company> comps = getCompanies();
-				int i=0;
-				while (ptDest == null) {
-					if (comps.get(i) != getMe().getLimo()
-							.getPassenger().getDestination()) {
-						ptDest = getCompanies().get(i).getBusStop();
-						break;
-					}
-					i++;
-				}
-				break;
-			case PASSENGER_DELIVERED_AND_PICKED_UP:
-			case PASSENGER_PICKED_UP:
-				pickup = AllPickups(getMe(), getPassengers());
-				ptDest = getMe().getLimo().getPassenger().getDestination()
-						.getBusStop();
-				break;
-
 			}
-
-			// coffee store override
-			switch (status) {
-			case PASSENGER_DELIVERED_AND_PICKED_UP:
-			case PASSENGER_DELIVERED:
-			case PASSENGER_ABANDONED:
-				if (getMe().getLimo().getCoffeeServings() <= 0) {
-					ptDest = getCoffeeStores().get(0).getBusStop();
-				}
-				break;
-			case PASSENGER_REFUSED_NO_COFFEE:
-			case PASSENGER_DELIVERED_AND_PICK_UP_REFUSED:
-				ptDest = getCoffeeStores().get(0).getBusStop();
-				break;
-			case COFFEE_STORE_CAR_RESTOCKED:
-				pickup = AllPickups(getMe(), getPassengers());
-				if (pickup.size() == 0)
-					break;
-				ptDest = pickup.get(0).getLobby().getBusStop();
-				break;
-			}
-
-			// may be another status
-			if (ptDest == null)
-				return;
-
-			DisplayOrders(ptDest);
-
-			// get the path from where we are to the dest.
-			java.util.ArrayList<Point> path = CalculatePathPlus1(getMe(),
-					ptDest);
-
-			if (log.isDebugEnabled()) {
-				log.debug(status
-						+ "; Path:"
-						+ (path.size() > 0 ? path.get(0).toString() : "{n/a}")
-						+ "-"
-						+ (path.size() > 0 ? path.get(path.size() - 1)
-								.toString() : "{n/a}")
-						+ ", "
-						+ path.size()
-						+ " steps; Pickup:"
-						+ (pickup.size() == 0 ? "{none}" : pickup.get(0)
-								.getName()) + ", " + pickup.size() + " total");
-			}
-
-			// update our saved Player to match new settings
-			if (path.size() > 0) {
-				getMe().getLimo().getPath().clear();
-				getMe().getLimo().getPath().addAll(path);
-			}
-			if (pickup.size() > 0) {
-				getMe().getPickUp().clear();
-				getMe().getPickUp().addAll(pickup);
-			}
-
-			sendOrders.invoke("move", path, pickup);
-		} catch (RuntimeException ex) {
-			ex.printStackTrace();
+			ptDest = getMe().getLimo().getPassenger() == toPickup ? toPickup
+					.getDestination().getBusStop() : toPickup.getLobby()
+					.getBusStop();
+			pickup.add(toPickup);
 		}
+
+		DisplayOrders(ptDest);
+
+		// get the path from where we are to the dest.
+		ArrayList<Point> path = CalculatePathPlus1(getMe(), ptDest);
+
+		if (log.isDebugEnabled()) {
+			log.debug(status
+					+ "; Path:"
+					+ (path.size() > 0 ? path.get(0).toString() : "{n/a}")
+					+ "-"
+					+ (path.size() > 0 ? path.get(path.size() - 1).toString()
+							: "{n/a}") + ", " + path.size() + " steps; Pickup:"
+					+ (pickup.size() == 0 ? "{none}" : pickup.get(0).getName())
+					+ ", " + pickup.size() + " total");
+		}
+		getMe().getLimo().getPath().clear();
+		getMe().getLimo().getPath().addAll(path);
+		getMe().getPickUp().clear();
+		getMe().getPickUp().addAll(pickup);
+		sendOrders.invoke("move", path, pickup);
 	}
 
 	private void MaybePlayPowerUp() {
@@ -434,12 +481,13 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 
 		if (pu2 == null)
 			return;
+		
 		// 10% discard, 90% play
 		//if it's a card that requires coffee, discard it
 		if (pu2.getCard() == PowerUp.CARD.MULT_DELIVERING_PASSENGER
 				|| pu2.getCard() == PowerUp.CARD.MULT_DELIVER_AT_COMPANY
 				|| pu2.getCard() == PowerUp.CARD.RELOCATE_ALL_CARS){//rand.nextInt(10) == 0){
-			playCards.invoke(PlayerAIBase.CARD_ACTION.PLAY, pu2);
+			playCards.invoke(PlayerAIBase.CARD_ACTION.DISCARD, pu2);
 		}
 		else if(!(rand.nextInt(10) == 0)) {
 			if (pu2.getCard() == PowerUp.CARD.MOVE_PASSENGER) {
@@ -464,11 +512,10 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 
 				if (plyrsWithPsngrs.size() == 0)
 					return;
-				//target highest scoring player in current game
+				// target highest scoring player in current game
 				Player targetPlyr = plyrsWithPsngrs.get(0);
-				for(Player plyr : plyrsWithPsngrs)
-				{
-					if(plyr.getScore()>targetPlyr.getScore())
+				for (Player plyr : plyrsWithPsngrs) {
+					if (plyr.getScore() > targetPlyr.getScore())
 						targetPlyr = plyr;
 				}
 				pu2.setPlayer(targetPlyr);
@@ -601,7 +648,7 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 		return path;
 	}
 
-	//returns a list of possible passengers to pickup
+	// returns a list of possible passengers to pickup
 	private static java.util.ArrayList<Passenger> AllPickups(Player me,
 			Iterable<Passenger> passengers) {
 		java.util.ArrayList<Passenger> pickup = new java.util.ArrayList<Passenger>();
@@ -616,56 +663,83 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 		Collections.sort(pickup, passengerComparator);
 		return pickup;
 	}
-	
-	private int getScore(Passenger pass)
-	{
-		//Calculates total distance to completion over 
-		int distToDest = SimpleAStar.CalculatePath(getGameMap(), pass.getLobby().getBusStop(), pass.getDestination().getBusStop()).size();
-		int distToPass=CalculatePathPlus1(privateMe,pass.getLobby().getBusStop()).size();
-		int score = (distToDest + distToPass)/pass.getPointsDelivered();
-		return score;
-	}
-	
-	private static class PassengerComparator implements Comparator<Passenger> {
-		MyPlayerBrain brain;
-		//compares passengers based on their total travel distance and point value
-		public int compare(Passenger a, Passenger b) {
-			int aScore = brain.getScore(a);
-			int bScore = brain.getScore(b);
-			return aScore - bScore;
+
+	private double getScore(Passenger pass) {
+		// Calculates total distance to completion over
+		Point source = pass == getMe().getLimo().getPassenger() ? getMe()
+				.getLimo().getMapPosition() : pass.getLobby().getBusStop();
+		int distToDest = SimpleAStar.CalculatePath(getGameMap(), source,
+				pass.getDestination().getBusStop()).size();
+		int distToPass = CalculatePathPlus1(privateMe, source).size();
+		double score = (double) pass.getPointsDelivered() / (distToDest + distToPass);
+		
+		double enemyMultiplier;
+		if(Collections.disjoint(pass.getDestination().getPassengers(), pass.getEnemies())) {
+			enemyMultiplier = 1.0;
+		} else {
+			double m=100;
+			enemyMultiplier = -(m / (distToDest+m))+1;
+			System.err.println(enemyMultiplier);
 		}
 		
+		score *= enemyMultiplier;
+		
+		return score;
+	}
+
+	private static class PassengerComparator implements Comparator<Passenger> {
+		MyPlayerBrain brain;
+
+		// compares passengers based on their total travel distance and point
+		// value
+		public int compare(Passenger a, Passenger b) {
+			double aScore = brain.getScore(a);
+			double bScore = brain.getScore(b);
+			if (aScore - bScore < 0) {
+				return -1;
+			} else if (aScore -bScore > 0) {
+				return 1;
+			} else {
+				return 0;
+			}
+		}
+
 		public PassengerComparator(MyPlayerBrain brain) {
 			this.brain = brain;
 		}
 	}
-	
-	private static class CoffeeStoreComparator implements Comparator<CoffeeStore> {
+
+	private static class CoffeeStoreComparator implements
+			Comparator<CoffeeStore> {
 		MyPlayerBrain brain;
-		
+
 		public int compare(CoffeeStore a, CoffeeStore b) {
-			int aDist=0, bDist=0;
-			aDist=brain.CalculatePathPlus1(brain.privateMe,a.getBusStop()).size();
-			bDist=brain.CalculatePathPlus1(brain.privateMe,b.getBusStop()).size();
-			return (aDist<=bDist?-1:1);
+			int aDist = 0, bDist = 0;
+			aDist = brain.CalculatePathPlus1(brain.privateMe, a.getBusStop())
+					.size();
+			bDist = brain.CalculatePathPlus1(brain.privateMe, b.getBusStop())
+					.size();
+			return (aDist <= bDist ? -1 : 1);
 		}
-		
+
 		public CoffeeStoreComparator(MyPlayerBrain brain) {
 			this.brain = brain;
 		}
 	}
-	
+
 	private static class CompanyComparator implements Comparator<Company> {
 		MyPlayerBrain brain;
-		
-		//sorts based on the distance between us and the companies' bus stops
+
+		// sorts based on the distance between us and the companies' bus stops
 		public int compare(Company a, Company b) {
-			int aDist=0, bDist=0;
-			aDist=brain.CalculatePathPlus1(brain.privateMe,a.getBusStop()).size();
-			bDist=brain.CalculatePathPlus1(brain.privateMe,b.getBusStop()).size();
-			return (aDist<=bDist?-1:1);
+			int aDist = 0, bDist = 0;
+			aDist = brain.CalculatePathPlus1(brain.privateMe, a.getBusStop())
+					.size();
+			bDist = brain.CalculatePathPlus1(brain.privateMe, b.getBusStop())
+					.size();
+			return (aDist <= bDist ? -1 : 1);
 		}
-		
+
 		public CompanyComparator(MyPlayerBrain brain) {
 			this.brain = brain;
 		}
