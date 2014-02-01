@@ -451,6 +451,7 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 
 				if (plyrsWithPsngrs.size() == 0)
 					return;
+				//target highest scoring player in current game
 				Player targetPlyr = plyrsWithPsngrs.get(0);
 				for(Player plyr : plyrsWithPsngrs)
 				{
