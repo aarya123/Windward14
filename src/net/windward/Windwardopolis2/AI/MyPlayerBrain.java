@@ -426,7 +426,7 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 		if (pu2 == null)
 			return;
 		// 10% discard, 90% play
-		if (rand.nextInt(10) == 0)
+		if (false)//rand.nextInt(10) == 0)
 			playCards.invoke(PlayerAIBase.CARD_ACTION.DISCARD, pu2);
 		else {
 			if (pu2.getCard() == PowerUp.CARD.MOVE_PASSENGER) {
@@ -451,7 +451,13 @@ public class MyPlayerBrain implements net.windward.Windwardopolis2.AI.IPlayerAI 
 
 				if (plyrsWithPsngrs.size() == 0)
 					return;
-				pu2.setPlayer(plyrsWithPsngrs.get(0));
+				Player targetPlyr = plyrsWithPsngrs.get(0);
+				for(Player plyr : plyrsWithPsngrs)
+				{
+					if(plyr.getScore()>targetPlyr.getScore())
+						targetPlyr = plyr;
+				}
+				pu2.setPlayer(targetPlyr);
 			}
 			if (log.isInfoEnabled())
 				log.info("Request play card " + pu2);
